@@ -290,7 +290,7 @@ pam_sm_close_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
 int
 pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char **argv)
 {
-	struct context *ctx = get_context(pamh, "acctmgmt");
+	struct context *ctx = get_context(pamh, "account");
 
 	msg("%s@%s: acct mgmt for %s@%s",
 	    ctx->svc, ctx->uts.nodename, ctx->user, ctx->rhost);
