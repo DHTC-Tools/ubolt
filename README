@@ -64,6 +64,10 @@ With these expansions, you can write a script that can be used both for
 an ACCOUNT module and for a SESSION module, if you need both superuser
 provisioning and user initialization.
 
+If this scripts exits with status 0, it will be considered to have
+succeeded.  PAM_SUCCESS will be returned, and login will proceed.  If
+the script returns nonzero, login will be blocked.
+
 pam_provision.so collects output from this script and sends it to syslog.
 LOG_AUTH is used by default, but you could change this to any other
 facility using the log= parameter: for example, log=local3.
