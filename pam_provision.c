@@ -255,7 +255,7 @@ provision(struct context *ctx, pam_handle_t *pamh, int flags, int argc, const ch
 
 
 /* PAM hook for SESSION opening:
- * other session required pam_provisioner.so exec=script.py %u
+ * other session required pam_provision.so exec=script.py %u
  */
 int
 pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
@@ -269,7 +269,7 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
 
 
 /* PAM hook for SESSION closing:
- * other session required pam_provisioner.so exec=script.py %u
+ * other session required pam_provision.so exec=script.py %u
  */
 int
 pam_sm_close_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
@@ -285,7 +285,7 @@ pam_sm_close_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
 
 
 /* PAM hook for ACCOUNT management:
- * other account required pam_provisioner.so exec=script.py %u
+ * other account required pam_provision.so exec=script.py %u
  */
 int
 pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char **argv)
