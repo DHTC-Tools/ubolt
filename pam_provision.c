@@ -347,10 +347,13 @@ int
 pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
 {
 	struct context *ctx = get_context(pamh, "session-open");
+	int result;
 
 	msg(ctx, LOG_INFO, "%s@%s: open session for %s@%s",
 	    ctx->svc, ctx->uts.nodename, ctx->user, ctx->rhost);
-	return provision(ctx, pamh, flags, argc, argv);
+	result = provision(ctx, pamh, flags, argc, argv);
+	free(ctx);
+	return result;
 }
 
 
@@ -361,12 +364,13 @@ int
 pam_sm_close_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
 {
 	struct context *ctx = get_context(pamh, "session-close");
+	int result;
 
 	msg(ctx, LOG_INFO, "%s@%s: close session for %s@%s",
 	    ctx->svc, ctx->uts.nodename, ctx->user, ctx->rhost);
-
+	result = provision(ctx, pamh, flags, argc, argv);
 	free(ctx);
-	return PAM_SUCCESS;
+	return result;
 }
 
 
@@ -377,8 +381,11 @@ int
 pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char **argv)
 {
 	struct context *ctx = get_context(pamh, "account");
+	int result;
 
 	msg(ctx, LOG_INFO, "%s@%s: acct mgmt for %s@%s",
 	    ctx->svc, ctx->uts.nodename, ctx->user, ctx->rhost);
-	return provision(ctx, pamh, flags, argc, argv);
+	result = provision(ctx, pamh, flags, argc, argv);
+	free(ctx);
+	return result;
 }
