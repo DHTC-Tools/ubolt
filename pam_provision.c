@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/socket.h>
+#include <syslog.h>
 
 #include <security/pam_appl.h>
 #include <sys/utsname.h>
@@ -23,7 +24,79 @@ struct context {
 	char *rhost;
 	char *module;
 	struct utsname uts;
+	int log;
 };
+
+
+/* Map syslog names */
+struct namemap {
+	char *name;
+	int value;
+};
+
+#define def(n) { #n, n }
+struct namemap syslogs[] = {
+	/* standard facilities */
+	def(LOG_KERN),
+	def(LOG_USER),
+	def(LOG_MAIL),
+	def(LOG_DAEMON),
+	def(LOG_AUTH),
+	def(LOG_SYSLOG),
+	def(LOG_LPR),
+	def(LOG_NEWS),
+	def(LOG_UUCP),
+	
+	/* nonstandard facilities */
+#ifdef LOG_MARK
+	def(LOG_MARK),
+#endif
+#ifdef LOG_AUDIT
+	def(LOG_AUDIT),
+#endif
+#ifdef LOG_CRON
+	def(LOG_CRON),
+#endif
+
+	/* local facilities */
+	def(LOG_LOCAL0),
+	def(LOG_LOCAL1),
+	def(LOG_LOCAL2),
+	def(LOG_LOCAL3),
+	def(LOG_LOCAL4),
+	def(LOG_LOCAL5),
+	def(LOG_LOCAL6),
+	def(LOG_LOCAL7),
+
+	/* priorities */
+	def(LOG_EMERG),
+	def(LOG_ALERT),
+	def(LOG_CRIT),
+	def(LOG_ERR),
+	def(LOG_WARNING),
+	def(LOG_NOTICE),
+	def(LOG_INFO),
+	def(LOG_DEBUG),
+	{ NULL, 0 }
+};
+#undef def
+
+
+int
+get_syslog(char *name)
+{
+	int i;
+
+	for (i = 0; syslogs[i].name; i++) {
+		if (!strcasecmp(name, syslogs[i].name))
+			return syslogs[i].value;
+		if (!strncmp(syslogs[i].name, "LOG_", 4) &&
+		    !strcasecmp(name, &syslogs[i].name[4]))
+			return syslogs[i].value;
+	}
+
+	return -1;
+}
 
 
 /* Create and populate a context based on a given PAM handle and
@@ -41,6 +114,7 @@ get_context(pam_handle_t *pamh, char *module)
 	pam_get_item(pamh, PAM_SERVICE, (void **)&ctx->svc);
 	pam_get_item(pamh, PAM_RHOST, (void **)&ctx->rhost);
 	ctx->module = strdup(module);
+	ctx->log = LOG_AUTH;
 
 	return ctx;
 }
@@ -48,7 +122,7 @@ get_context(pam_handle_t *pamh, char *module)
 
 /* General syslog front-end */
 void
-msg(char *fmt, ...)
+msg(struct context *ctx, int level, char *fmt, ...)
 {
 	char fmtbuf[1024];
 	char msgbuf[1024];
@@ -59,7 +133,7 @@ msg(char *fmt, ...)
 	vsnprintf(msgbuf, sizeof(msgbuf), fmtbuf, vp);
 	va_end(vp);
 
-	syslog(LOG_AUTH|LOG_INFO, msgbuf);
+	syslog(ctx->log|level, msgbuf);
 }
 
 
@@ -86,16 +160,16 @@ sh(struct context *ctx, char **argv)
 		msgbuf[off++] = '"';
 		msgbuf[off++] = ' ';
 	}
-	msg("executing %s", msgbuf);
+	msg(ctx, LOG_INFO, "executing %s", msgbuf);
 
 	if (socketpair(AF_UNIX, SOCK_STREAM, 0, sock) != 0) {
-		msg("cannnot socketpair: %s", strerror(errno));
+		msg(ctx, LOG_WARNING, "cannnot socketpair: %s", strerror(errno));
 		return PAM_SYSTEM_ERR;
 	}
 
 	pid = fork();
 	if (pid < 0) {
-		msg("cannnot fork: %s", strerror(errno));
+		msg(ctx, LOG_WARNING, "cannnot fork: %s", strerror(errno));
 		close(sock[0]);
 		close(sock[1]);
 		return PAM_SYSTEM_ERR;
@@ -130,14 +204,14 @@ sh(struct context *ctx, char **argv)
 			p = strchr(buf, '\r');
 			if (p)
 				*p = '\0';
-			msg("exec: %s", buf);
+			msg(ctx, LOG_INFO, "exec: %s", buf);
 		}
 		fclose(fp);
 		close(sock[0]);
 
 		waitpid(pid, &stat, 0);
 		if (WEXITSTATUS(stat) != 0) {
-			msg("exec returned %d", WEXITSTATUS(stat));
+			msg(ctx, LOG_INFO, "exec returned %d", WEXITSTATUS(stat));
 			return PAM_SYSTEM_ERR;
 		}
 	}
@@ -230,7 +304,18 @@ provision(struct context *ctx, pam_handle_t *pamh, int flags, int argc, const ch
 	int status = PAM_SUCCESS;
 
 	for (i = 0; i < argc; i++) {
-		if (!strncmp(argv[i], "exec=", 5)) {
+		if (!strncmp(argv[i], "log=", 4)) {
+			int log;
+			log = get_syslog((char *)&argv[i][4]);
+			if (log == -1) {
+				msg(ctx, LOG_WARNING, "unknown log facility %s", &argv[i][4]);
+				return PAM_SERVICE_ERR;
+			}
+			else {
+				ctx->log = log;
+			}
+		}
+		else if (!strncmp(argv[i], "exec=", 5)) {
 			xargv = malloc(sizeof(char *) * (argc - i + 1));
 			xargv[0] = expand(ctx, (char *)&argv[i][5]);
 			for (i++, j = 1; i < argc; i++, j++)
@@ -239,7 +324,8 @@ provision(struct context *ctx, pam_handle_t *pamh, int flags, int argc, const ch
 			break;
 		}
 		else {
-			msg("unknown parameter %s", argv[i]);
+			msg(ctx, LOG_WARNING, "unknown parameter %s", argv[i]);
+			return PAM_SERVICE_ERR;
 		}
 	}
 
@@ -262,7 +348,7 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
 {
 	struct context *ctx = get_context(pamh, "session-open");
 
-	msg("%s@%s: open session for %s@%s",
+	msg(ctx, LOG_INFO, "%s@%s: open session for %s@%s",
 	    ctx->svc, ctx->uts.nodename, ctx->user, ctx->rhost);
 	return provision(ctx, pamh, flags, argc, argv);
 }
@@ -276,7 +362,7 @@ pam_sm_close_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
 {
 	struct context *ctx = get_context(pamh, "session-close");
 
-	msg("%s@%s: close session for %s@%s",
+	msg(ctx, LOG_INFO, "%s@%s: close session for %s@%s",
 	    ctx->svc, ctx->uts.nodename, ctx->user, ctx->rhost);
 
 	free(ctx);
@@ -292,7 +378,7 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char **argv)
 {
 	struct context *ctx = get_context(pamh, "account");
 
-	msg("%s@%s: acct mgmt for %s@%s",
+	msg(ctx, LOG_INFO, "%s@%s: acct mgmt for %s@%s",
 	    ctx->svc, ctx->uts.nodename, ctx->user, ctx->rhost);
 	return provision(ctx, pamh, flags, argc, argv);
 }

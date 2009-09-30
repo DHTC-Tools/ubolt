@@ -33,6 +33,7 @@ Your particular environment decides the service name. "sshd-kbdint" is
 used for keyboard authentication under OpenSSH, but "login" is used for
 local logins.  If you do not know what service to use, try "other" and
 watch your logs to see what service is identified by a login attempt.
+You may need to configure syslog to record LOG_DEBUG messages.
 
 pam_provision.so can be used as an ACCOUNT module or as a SESSION
 module.  ACCOUNT modules are called once after authentication succeeds,
@@ -44,7 +45,9 @@ for initializing any session state.  SESSION runs once to open the
 session, and once to close the session (presumably at logout).  It
 runs under the user's privilege.
 
-At present only one parameter is supported: exec=[path to script]
+At present two parameters are supported:
+	log=[syslog facility name]
+	exec=[path to script]
 
 The "exec=" parameter MUST be the last option, since it implies
 extra arguments to the provisioner script.  Those arguments are
@@ -61,5 +64,7 @@ With these expansions, you can write a script that can be used both for
 an ACCOUNT module and for a SESSION module, if you need both superuser
 provisioning and user initialization.
 
-pam_provision.so collects output from this script and sends it to syslog
-at auth.info level.
+pam_provision.so collects output from this script and sends it to syslog.
+LOG_AUTH is used by default, but you could change this to any other
+facility using the log= parameter: for example, log=local3.
+
