@@ -120,6 +120,16 @@ get_context(pam_handle_t *pamh, char *module)
 }
 
 
+/* Release a context structure cleanly. */
+void
+free_context(struct context *ctx)
+{
+	if (ctx->module)
+		free(ctx->module);
+	free(ctx);
+}
+
+
 /* General syslog front-end */
 void
 msg(struct context *ctx, int level, char *fmt, ...)
@@ -335,7 +345,7 @@ provision(struct context *ctx, pam_handle_t *pamh, int flags, int argc, const ch
 			free(xargv[i]);
 	}
 
-	free(ctx);
+	free_context(ctx);
 	return status;
 }
 
@@ -352,7 +362,7 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
 	msg(ctx, LOG_INFO, "%s@%s: open session for %s@%s",
 	    ctx->svc, ctx->uts.nodename, ctx->user, ctx->rhost);
 	result = provision(ctx, pamh, flags, argc, argv);
-	free(ctx);
+	free_context(ctx);
 	return result;
 }
 
@@ -369,7 +379,7 @@ pam_sm_close_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
 	msg(ctx, LOG_INFO, "%s@%s: close session for %s@%s",
 	    ctx->svc, ctx->uts.nodename, ctx->user, ctx->rhost);
 	result = provision(ctx, pamh, flags, argc, argv);
-	free(ctx);
+	free_context(ctx);
 	return result;
 }
 
@@ -386,6 +396,6 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char **argv)
 	msg(ctx, LOG_INFO, "%s@%s: acct mgmt for %s@%s",
 	    ctx->svc, ctx->uts.nodename, ctx->user, ctx->rhost);
 	result = provision(ctx, pamh, flags, argc, argv);
-	free(ctx);
+	free_context(ctx);
 	return result;
 }
