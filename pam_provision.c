@@ -139,7 +139,8 @@ msg(struct context *ctx, int level, char *fmt, ...)
 	va_list vp;
 
 	va_start(vp, fmt);
-	snprintf(fmtbuf, sizeof(fmtbuf), "%s: %s", NAME, fmt);
+	snprintf(fmtbuf, sizeof(fmtbuf), "%s<%s>: %s",
+	         NAME, ctx->module ? ctx->module : "unknown", fmt);
 	vsnprintf(msgbuf, sizeof(msgbuf), fmtbuf, vp);
 	va_end(vp);
 
