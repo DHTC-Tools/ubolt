@@ -116,6 +116,13 @@ get_context(pam_handle_t *pamh, char *module)
 	ctx->module = strdup(module);
 	ctx->log = LOG_AUTH;
 
+	if (ctx->user == NULL)
+		ctx->user = "(unknown)";
+	if (ctx->svc == NULL)
+		ctx->svc = "(unknown)";
+	if (ctx->rhost == NULL)
+		ctx->rhost = "(local)";
+
 	return ctx;
 }
 
