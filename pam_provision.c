@@ -107,13 +107,20 @@ get_context(pam_handle_t *pamh, char *module)
 {
 	struct context *ctx;
 
+	syslog(LOG_AUTH|LOG_DEBUG, "get_context (%s) in", module ? module : "??");
+
 	ctx = malloc(sizeof(struct context));
 	memset(ctx, 0, sizeof(struct context));
 
+	syslog(LOG_AUTH|LOG_DEBUG, "uname");
 	uname(&ctx->uts);
+	syslog(LOG_AUTH|LOG_DEBUG, "pam_get_user");
 	pam_get_user(pamh, &ctx->user, NULL);
+	syslog(LOG_AUTH|LOG_DEBUG, "pam_get_item(PAM_SERVICE)");
 	pam_get_item(pamh, PAM_SERVICE, (void **)&ctx->svc);
+	syslog(LOG_AUTH|LOG_DEBUG, "pam_get_item(PAM_RHOST)");
 	pam_get_item(pamh, PAM_RHOST, (void **)&ctx->rhost);
+	syslog(LOG_AUTH|LOG_DEBUG, "strdup");
 	ctx->module = strdup(module);
 	ctx->log = LOG_AUTH;
 
@@ -124,6 +131,7 @@ get_context(pam_handle_t *pamh, char *module)
 	if (ctx->rhost == NULL)
 		ctx->rhost = "(local)";
 
+	syslog(LOG_AUTH|LOG_DEBUG, "get_context (%s) out", module ? module : "??");
 	return ctx;
 }
 
