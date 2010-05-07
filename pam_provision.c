@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <signal.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/socket.h>
@@ -167,6 +168,7 @@ sh(struct context *ctx, char **argv)
 	int stat;
 	int sock[2];
 	int null;
+	void *oldhandler = NULL;
 
 	memset(msgbuf, 0, sizeof(msgbuf));
 
@@ -185,8 +187,14 @@ sh(struct context *ctx, char **argv)
 		return PAM_SYSTEM_ERR;
 	}
 
+	/* restore default sigchld handler, saving the prior handler.
+	 * (sigchld handler might have been set by the pam agent.) */
+	oldhandler = signal(SIGCHLD, SIG_DFL);
+
 	pid = fork();
 	if (pid < 0) {
+		/* error - restore original sigchld handler and return */
+		signal(SIGCHLD, oldhandler);
 		msg(ctx, LOG_WARNING, "cannnot fork: %s", strerror(errno));
 		close(sock[0]);
 		close(sock[1]);
@@ -194,7 +202,7 @@ sh(struct context *ctx, char **argv)
 	}
 
 	else if (pid == 0) {
-		/* child */
+		/* child - keep sig_dfl sigchld handler until death do it part */
 		close(sock[0]);
 		null = open("/dev/null", O_RDONLY);
 		dup2(null, 0);
@@ -207,7 +215,7 @@ sh(struct context *ctx, char **argv)
 	}
 
 	else {
-		/* parent */
+		/* parent - restore sigchld handler -only- after reaping child */
 		FILE *fp;
 		char buf[1024];
 		char *p;
@@ -228,6 +236,7 @@ sh(struct context *ctx, char **argv)
 		close(sock[0]);
 
 		waitpid(pid, &stat, 0);
+		signal(SIGCHLD, oldhandler);
 		if (WEXITSTATUS(stat) != 0) {
 			msg(ctx, LOG_INFO, "exec returned %d", WEXITSTATUS(stat));
 			return PAM_SYSTEM_ERR;
