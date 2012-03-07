@@ -1,7 +1,7 @@
 Summary: a PAM module for automatic, dynamic account provisioning
 Name: pam_provision
 Version: 17
-Release: 0
+Release: 1
 License: MIT
 URL: https://bitbucket.org/dgc/pam_provision
 Group: Foo/Bar
@@ -33,11 +33,8 @@ make all
 
 %install
 rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT/usr/lib/security
-cp pam_provision.so $RPM_BUILD_ROOT/usr/lib/security
-#mkdir -p $RPM_BUILD_ROOT/usr/share/doc/%{name}
-#cp provision.py $RPM_BUILD_ROOT/usr/share/doc/%{name}/
-#cp README LICENSE $RPM_BUILD_ROOT/usr/share/doc/%{name}/
+mkdir -p $RPM_BUILD_ROOT/%{_lib}/security
+cp pam_provision.so $RPM_BUILD_ROOT/%{_lib}/security
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -46,4 +43,4 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %doc LICENSE README
 %doc provision.py
-/usr/lib/security/pam_provision.so
+/%{_lib}/security/pam_provision.so
