@@ -13,6 +13,7 @@
 #include <syslog.h>
 
 #include <security/pam_appl.h>
+#include <security/pam_modules.h>
 #include <sys/utsname.h>
 
 #define NAME "pam_provision"
@@ -20,10 +21,10 @@
 /* The context structure accumulates information about the context of
  * the PAM event so that logging and other utility code can cite it.  */
 struct context {
-	char *user;
-	char *svc;
-	char *rhost;
-	char *module;
+	PAM_CONST char *user;
+	PAM_CONST char *svc;
+	PAM_CONST char *rhost;
+	PAM_CONST char *module;
 	struct utsname uts;
 	int log;
 };
@@ -117,9 +118,9 @@ get_context(pam_handle_t *pamh, char *module)
 	syslog(LOG_AUTH|LOG_DEBUG, "pam_get_user");
 	pam_get_user(pamh, &ctx->user, NULL);
 	syslog(LOG_AUTH|LOG_DEBUG, "pam_get_item(PAM_SERVICE)");
-	pam_get_item(pamh, PAM_SERVICE, (void **)&ctx->svc);
+	pam_get_item(pamh, PAM_SERVICE, (PAM_CONST void **)&ctx->svc);
 	syslog(LOG_AUTH|LOG_DEBUG, "pam_get_item(PAM_RHOST)");
-	pam_get_item(pamh, PAM_RHOST, (void **)&ctx->rhost);
+	pam_get_item(pamh, PAM_RHOST, (PAM_CONST void **)&ctx->rhost);
 	syslog(LOG_AUTH|LOG_DEBUG, "strdup");
 	ctx->module = strdup(module);
 	ctx->log = LOG_AUTH;
@@ -141,7 +142,7 @@ void
 free_context(struct context *ctx)
 {
 	if (ctx->module)
-		free(ctx->module);
+		free((void *)ctx->module);
 	free(ctx);
 }
 

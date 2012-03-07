@@ -1,2 +1,2 @@
-CFLAGS = -Wall -shared
+CFLAGS = -Wall -shared -DPAM_CONST=
 LIBS = -lsocket -lnsl

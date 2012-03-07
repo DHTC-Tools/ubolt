@@ -1,2 +1,2 @@
-CFLAGS = -Wall -shared -fPIC
+CFLAGS = -Wall -shared -fPIC -DPAM_CONST=const
 LIBS = 
