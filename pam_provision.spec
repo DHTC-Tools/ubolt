@@ -1,11 +1,11 @@
 Summary: a PAM module for automatic, dynamic account provisioning
 Name: pam_provision
-Version: 17
+Version: 20
 Release: 1
 License: MIT
 URL: https://bitbucket.org/dgc/pam_provision
 Group: Foo/Bar
-%define hg_rev 8ab6a51f4865
+%define hg_rev 7abe9fe4b45d
 Source0: https://bitbucket.org/dgc/pam_provision/get/%{hg_rev}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
