@@ -371,7 +371,6 @@ provision(struct context *ctx, pam_handle_t *pamh, int flags, int argc, const ch
 			free(xargv[i]);
 	}
 
-	free_context(ctx);
 	return status;
 }
 
