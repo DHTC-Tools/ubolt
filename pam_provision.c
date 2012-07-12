@@ -165,6 +165,50 @@ msg(struct context *ctx, int level, char *fmt, ...)
 }
 
 
+/* Set up environment with pam params */
+void
+env_setup(pam_handle_t *pamh, char *type)
+{
+	char tmp[1024];
+	char *p;
+
+	pam_get_item(pamh, PAM_RHOST, (PAM_CONST void **)&p);
+	if (p == NULL)
+		p = "";
+    snprintf(tmp, sizeof(tmp), "PAM_RHOST=%s", p);
+	putenv(strdup(tmp));
+
+	pam_get_item(pamh, PAM_RUSER, (PAM_CONST void **)&p);
+	if (p == NULL)
+		p = "";
+    snprintf(tmp, sizeof(tmp), "PAM_RUSER=%s", p);
+	putenv(strdup(tmp));
+
+	pam_get_item(pamh, PAM_SERVICE, (PAM_CONST void **)&p);
+	if (p == NULL)
+		p = "";
+    snprintf(tmp, sizeof(tmp), "PAM_SERVICE=%s", p);
+	putenv(strdup(tmp));
+
+	pam_get_item(pamh, PAM_TTY, (PAM_CONST void **)&p);
+	if (p == NULL)
+		p = "";
+    snprintf(tmp, sizeof(tmp), "PAM_TTY=%s", p);
+	putenv(strdup(tmp));
+
+	pam_get_user(pamh, (PAM_CONST char **)&p, NULL);
+	if (p == NULL)
+		p = "";
+    snprintf(tmp, sizeof(tmp), "PAM_USER=%s", p);
+	putenv(strdup(tmp));
+
+	if (type == NULL)
+		type = "unknown";
+    snprintf(tmp, sizeof(tmp), "PAM_TYPE=%s", type);
+	putenv(strdup(tmp));
+}
+
+
 /* Execute a program (identified in argv[]) under the given context.
  * Collect output and log it. */
 int
@@ -384,6 +428,7 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
 	struct context *ctx = get_context(pamh, "session-open");
 	int result;
 
+	env_setup(pamh, "open_session");
 	msg(ctx, LOG_INFO, "%s@%s: open session for %s@%s",
 	    ctx->svc, ctx->uts.nodename, ctx->user, ctx->rhost);
 	result = provision(ctx, pamh, flags, argc, argv);
@@ -401,6 +446,7 @@ pam_sm_close_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
 	struct context *ctx = get_context(pamh, "session-close");
 	int result;
 
+	env_setup(pamh, "close_session");
 	msg(ctx, LOG_INFO, "%s@%s: close session for %s@%s",
 	    ctx->svc, ctx->uts.nodename, ctx->user, ctx->rhost);
 	result = provision(ctx, pamh, flags, argc, argv);
@@ -418,6 +464,7 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char **argv)
 	struct context *ctx = get_context(pamh, "account");
 	int result;
 
+	env_setup(pamh, "account");
 	msg(ctx, LOG_INFO, "%s@%s: acct mgmt for %s@%s",
 	    ctx->svc, ctx->uts.nodename, ctx->user, ctx->rhost);
 	result = provision(ctx, pamh, flags, argc, argv);
