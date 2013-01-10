@@ -1,17 +1,25 @@
 
-target = libnss_identity.so.2
+targets = nss_identity
 
-all: $(target)
+all: $(targets)
 
-$(target): nss_identity.o
-	gcc -shared -Wl,-soname,$(target) -o $(target) nss_identity.o
+$(targets):
+	@ $(MAKE) nsslink name=$@
 
-nss_identity.o: nss_identity.c
+$(patsubst %,%.c,$(targets)):
+	@ $(MAKE) nsscc name=$@
+
+.PHONY: nsslink nsscc
+
+nsslink: $(name).o
+	gcc -shared -Wl,-soname,lib$(name).so.2 -o lib$(name).so.2 $(name).o
+
+nsscc: $(name).c
 	if [ $$(arch) = i386 ]; then \
-		gcc -c -shared nss_identity.c; \
+		gcc -c -shared $(name).c; \
 	else \
-		gcc -fPIC -c -shared nss_identity.c; \
+		gcc -fPIC -c -shared $(name).c; \
 	fi
 
 clean:
-	rm -f nss_identity.o $(target)
+	rm -f $(patsubst %,%.o,$(targets)) $(patsubst %,lib%.so.2,$(targets))
