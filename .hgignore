@@ -3,3 +3,4 @@ syntax: glob
 *.so
 *.so.2
 *.o
+doc/*.3
