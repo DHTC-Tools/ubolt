@@ -23,7 +23,8 @@ nsslink: $(name).o
 	gcc -shared -Wl,-soname,lib$(name).so.2 -o lib$(name).so.2 $(name).o
 
 manual: doc/$(name).txt
-	-rst2man doc/$(name).txt >doc/$(name).3
+	-rst2man doc/$(name).txt >doc/$(name).3.tmp
+	mv -f doc/$(name).3.tmp doc/$(name).3
 
 nsscc: $(name).c
 	gcc -fPIC -c -shared $(name).c
