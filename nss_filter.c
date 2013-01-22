@@ -147,7 +147,7 @@ filter_passwd(struct passwd *pwd, char *buffer, size_t buflen)
 static void
 init_wrapper (void)
 { 
-  if (__nss_database_lookup ("filter_backend", NULL, "files", &nssinfo) >= 0)
+  if (__nss_database_lookup ("filter.backend.passwd", NULL, "files", &nssinfo) >= 0)
     { 
       backend_getpwnam_r = (void *) __nss_lookup_function (nssinfo, "getpwnam_r");
       backend_getpwuid_r = (void *) __nss_lookup_function (nssinfo, "getpwuid_r");

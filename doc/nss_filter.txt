@@ -21,7 +21,7 @@ SYNOPSIS
 
     passwd:         filter
 
-    filter_backend: files
+    filter.backend.passwd: files
 
 
 DESCRIPTION
@@ -54,7 +54,7 @@ EXAMPLE
   Now assume the following line in /etc/nsswitch.conf::
 
     passwd: filter
-    filter_backend: files
+    filter.backend.passwd: files
 
   This result should occur::
 
