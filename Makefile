@@ -1,5 +1,7 @@
 
-targets = nss_identity
+targets = nss_identity nss_filter
+
+CFLAGS	= -DDEBUG
 
 all: $(targets)
 
