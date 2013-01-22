@@ -1,20 +1,46 @@
-SUMMARY.
+============
+nss_identity
+============
 
-    nss_identity provides a means of fabricating POSIX nameservice
-    entries based upon information present in the request and (perhaps)
-    elsewhere within the nsswitch framework, but without reference to
-    an external source of authority.  This is primarily useful for
-    fabricating identities: a 1:1 mapping of numeric IDs to predictably
-    corresponding text representations.
+----------------------------------------------------
+fabricate NSS group information based upon user uids
+----------------------------------------------------
 
-EXAMPLE.
+:Author: dgc@uchicago.edu
+:Date:   2013-01-22
+:Copyright: David Champion and University of Chicago
+:Version: 0.1
+:Manual section: 3
+:Manual group: nsswitch libraries
 
-    Assume that no group with gid=1234 or gid=5555 is defined explicitly,
-    and that the following user exists:
+
+SYNOPSIS
+========
+
+  In ``/etc/nsswitch.conf``::
+
+    group: files identity
+
+
+DESCRIPTION
+===========
+
+  nss_identity provides a means of fabricating POSIX nameservice entries
+  based upon information present in the request and (perhaps) elsewhere
+  within the nsswitch framework, but without reference to an external
+  source of authority.  This is primarily useful for fabricating
+  identities: a 1:1 mapping of numeric IDs to predictably corresponding
+  text representations.
+
+EXAMPLE
+=======
+
+  Assume that no group with ``gid=1234`` or ``gid=5555`` is defined
+  explicitly, and that the following user exists::
 
     bork:x:1234:1234:Chef Bork:/home/bork:/bin/borsh
 
-    The following commands will return results as indicated:
+  The following commands will return results as indicated::
 
     $ getent group 1234
     [no results]
@@ -23,8 +49,11 @@ EXAMPLE.
     $ getent group bork
     [no results]
 
-    Now assume the following line in /etc/nsswitch.conf:
+  Now assume the following line in /etc/nsswitch.conf::
+
     group: identity
+
+  These results should occur::
 
     $ getent group 1234
     bork::1234:bork
@@ -35,45 +64,46 @@ EXAMPLE.
     $ getent group group_1234
     group_1234::1234:bork
 
-    The nss_identity nss module fabricates identities based on available
-    nsswitch information.
+  The nss_identity nss module fabricates identities based on available
+  nsswitch information.
 
-    Currently only the GROUP service is supported.  Other services may be
-    added if useful.
+  Currently only the GROUP service is supported.  Other services may be
+  added if useful.
 
+USE CASE
+========
 
-USE CASE.
+  An identity mapping of groups to users is primarily useful where
+  your site is using some external source of user information, such as
+  nss_ldap, and where that source does NOT provide corresponding POSIX
+  group information.
 
-    An identity mapping of groups to users is primarily useful where
-    your site is using some external source of user information, such as
-    nss_ldap, and where that source does NOT provide corresponding POSIX
-    group information.
-
-    For example, suppose a site uses this nsswitch configuration:
+  For example, suppose a site uses this nsswitch configuration::
 
     passwd: files ldap
 
-    Thousands of users may be virtually defined on this system through
-    the use of nss_ldap, but if LDAP does not provide group definitions,
-    then those users' gids will not map back to valid group entries.
-    As far as UNIX is concerned that is OK, but some software may take
-    issue with being unable to reverse a user's GID to a group entry.
+  Thousands of users may be virtually defined on this system through
+  the use of nss_ldap, but if LDAP does not provide group definitions,
+  then those users' gids will not map back to valid group entries.
+  As far as UNIX is concerned that is OK, but some software may take
+  issue with being unable to reverse a user's GID to a group entry.
 
-    Suppose that we add the following to nsswitch.conf:
+  Suppose that we add the following to nsswitch.conf::
 
     group: files identity
 
-    Now groups may be defined explicitly in /etc/group, but any group
-    that does not exist locally will be resolved in nss_identity.  This
-    guarantees that a reverse mapping is possible even when there is no
-    local group definition.
+  Now groups may be defined explicitly in /etc/group, but any group
+  that does not exist locally will be resolved in nss_identity.  This
+  guarantees that a reverse mapping is possible even when there is no
+  local group definition.
 
 
-TO DO.
+TO DO
+=====
 
-    This is adequate to current need, but it might be nice to have the
-    option to fail lookup of GIDs that do not correspond to any known
-    user, rather than fabricating a group entry.  This is probably best
-    accomplished with two separate builds of the nss library, but the
-    behavior can be switched using cpp a macro instead of two distinct
-    code paths.
+  This is adequate to current need, but it might be nice to have the
+  option to fail lookup of GIDs that do not correspond to any known
+  user, rather than fabricating a group entry.  This is probably best
+  accomplished with two separate builds of the nss library, but the
+  behavior can be switched using cpp a macro instead of two distinct
+  code paths.
