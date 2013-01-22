@@ -1,0 +1,118 @@
+==========
+nss_filter
+==========
+
+----------------------------------------------
+alter NSS database results in-flight (limited)
+----------------------------------------------
+
+:Author: dgc@uchicago.edu
+:Date:   2013-01-22
+:Copyright: David Champion and University of Chicago
+:Version: 0.1
+:Manual section: 3
+:Manual group: nsswitch libraries
+
+
+SYNOPSIS
+========
+
+  In ``/etc/nsswitch.conf``::
+
+    passwd:         filter
+
+    filter_backend: files
+
+
+DESCRIPTION
+===========
+
+  nss_filter is a preliminary effort at an NSS library that authoritatively
+  sources nothing, but can filter results from other libraries.  It is
+  currently quite limited: it is capable of filtering only passwd, and it
+  can only perform one type of filtering: replacing a '&' token with the
+  user login ID (``pw_name``).  This is sufficient proof of concept and
+  adequate to our current need, but it should be extended:
+
+  * because it can be, and it is not complete;
+  * because it only offers one type of filter that is hardcoded.
+
+
+EXAMPLE
+=======
+
+  Assume a user defined in ``/etc/passwd`` as follows:
+  explicitly, and that the following user exists::
+
+    bork:x:1234:1234:Chef &:/home/&:/bin/&-sh
+
+  The following command will return results as indicated::
+
+    $ getent passwd bork
+    bork:x:1234:1234:Chef &:/home/&:/bin/&-sh
+
+  Now assume the following line in /etc/nsswitch.conf::
+
+    passwd: filter
+    filter_backend: files
+
+  This result should occur::
+
+    bork:x:1234:1234:Chef Bork:/home/bork:/bin/bork-sh
+
+  The nss_filter module replaces ``&`` in the passwd structure with the
+  user name.  In the case of ``pw_gecos`` it capitalizes it, in keeping
+  with ancient BSD userspace software practice.
+
+  Currently only the PASSWD service is supported, as the ``&`` symbol
+  is only meaningful in this scenario.  However once other filtration
+  mechanisms are available, ``nss_filter`` should be extended to support
+  them arbitrarily.
+
+
+USE CASE
+========
+
+  The example above is simple and not very useful: why use an ampersand
+  in individual ``passwd`` structures when you can simply write them
+  correctly in the first place?
+
+  Consider the use of an external authority for user information, where
+  home directories are not what you would desire.  (The argument applies
+  equally to GECOS or shell, although those are less likely to be a
+  problem.)  If you're using nss_compat, you can supercede these locally
+  in your mask::
+
+    (/etc/nsswitch.conf):
+    passwd: compat
+    passwd_compat: ldap
+
+    (/etc/passwd):
+    +:::::/home/&:
+
+  Regardless of the exact setting of a user's home directory in LDAP,
+  locally it will expand to ``/home/username``.
+
+
+TO DO
+=====
+
+  This is adequate to current need, but not an ideal solution.  The
+  ideal would permit more types of filter: arbitrary substitutions,
+  permutations, and perhaps even conditions.  It would allow these to be
+  coded in something other than the C implementation of the NSS library
+  itself.
+
+  The current plan is to develop an nss_external library that will
+  be able to pull NSS data from an arbitrary external source that
+  speaks the nss_external protocol. This is a simpler alternative
+  to developing a programmatic backend that speaks NIS(PLUS), LDAP,
+  etc at the front end, and is arbitrarily extensible.  The back
+  end may be indefinitely customized, or may be a simple framework
+  for bridging other directory services to NSS without specialized
+  NSS libraries for those directories.  In effect, it will be a
+  meta-nameservice.  Performance naturally will not compare favorably
+  to native implementations, but with NSCD in play (and network latency
+  often a factor anyway), it is expected that performance gaps will be
+  minimized.
+
