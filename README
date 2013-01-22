@@ -1,0 +1,27 @@
+
+NSS_UC3 consists (currently) of two NSS libraries summarized as follows.  See
+doc/nss_*.txt for deeper details.
+
+nss_identity
+============
+
+  nss_identity provides a means of fabricating POSIX nameservice entries
+  based upon information present in the request and (perhaps) elsewhere
+  within the nsswitch framework, but without reference to an external
+  source of authority.  This is primarily useful for fabricating
+  identities: a 1:1 mapping of numeric IDs to predictably corresponding
+  text representations.
+
+nss_filter
+==========
+
+  nss_filter is a preliminary effort at an NSS library that authoritatively
+  sources nothing, but can filter results from other libraries.  It is
+  currently quite limited: it is capable of filtering only passwd, and it
+  can only perform one type of filtering: replacing a '&' token with the
+  user login ID (``pw_name``).  This is sufficient proof of concept and
+  adequate to our current need, but it should be extended:
+
+  * because it can be, and it is not complete;
+  * because it only offers one type of filter that is hardcoded.
+
