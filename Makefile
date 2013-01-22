@@ -5,8 +5,9 @@ targets = nss_identity nss_filter
 # information to stdout when NSSDEBUG is set in the environment.
 #CFLAGS	+= -DDEBUG
 
-# For Linux x86_64, -fPIC is required
-CFLAGS += $(shell [ "`uname -sm`" = "Linux x86_64" ] && echo -fPIC)
+# -fPIC is not required on all platforms, but is on some; and it doesn't
+# appear to hurt.
+CFLAGS += -fPIC
 
 all: $(targets)
 
@@ -25,11 +26,7 @@ manual: doc/$(name).txt
 	-rst2man doc/$(name).txt >doc/$(name).3
 
 nsscc: $(name).c
-	if [ $$(arch) = i386 ]; then \
-		gcc -c -shared $(name).c; \
-	else \
-		gcc -fPIC -c -shared $(name).c; \
-	fi
+	gcc -fPIC -c -shared $(name).c
 
 clean:
 	rm -f $(patsubst %,%.o,$(targets)) $(patsubst %,lib%.so.2,$(targets)) \
