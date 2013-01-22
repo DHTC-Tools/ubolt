@@ -41,7 +41,7 @@ printd(char *fmt, ...)
 	va_end(vp);
 }
 #else
-# define printf()
+# define printd(...)
 #endif
 
 void
