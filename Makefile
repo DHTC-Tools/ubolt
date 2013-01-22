@@ -1,7 +1,12 @@
 
 targets = nss_identity nss_filter
 
-CFLAGS	= -DDEBUG
+# If compiled with -DDEBUG, then applications will print debugging
+# information to stdout when NSSDEBUG is set in the environment.
+#CFLAGS	+= -DDEBUG
+
+# For Linux x86_64, -fPIC is required
+CFLAGS += $(shell [ "`uname -sm`" = "Linux x86_64" ] && echo -fPIC)
 
 all: $(targets)
 
