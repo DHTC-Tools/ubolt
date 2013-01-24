@@ -11,6 +11,10 @@
 
 static void *nssinfo;
 
+/* This function is part of nss itself.  It's available at runtime
+ * but no user-land header declares it (currently?). */
+extern enum nss_status (*__nss_lookup_function(void *nssinfo, char *func))();
+
 static enum nss_status (*backend_getpwnam_r) (const char *name,
                         struct passwd *pwd,
                         char *buffer, size_t buflen, int *errnop);
