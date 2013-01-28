@@ -1,9 +1,12 @@
 
+prefix = /
+libdir = $(prefix)/lib
+
 targets = nss_identity nss_filter
 
 # If compiled with -DDEBUG, then applications will print debugging
 # information to stdout when NSSDEBUG is set in the environment.
-#CFLAGS	+= -DDEBUG
+CFLAGS	+= -DDEBUG -g
 
 # -fPIC is not required on all platforms, but is on some; and it doesn't
 # appear to hurt.
@@ -29,6 +32,10 @@ manual: doc/$(name).txt
 nsscc: $(name).c
 	gcc -fPIC -c -shared $(name).c
 
+install:
+	cp -f $(patsubst %,lib%.so.2,$(targets)) $(libdir)
+
 clean:
 	rm -f $(patsubst %,%.o,$(targets)) $(patsubst %,lib%.so.2,$(targets)) \
 	$(patsubst %,doc/%.3,$(targets))
+
