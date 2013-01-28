@@ -9,6 +9,10 @@
 #include <stdarg.h>
 #include <stdbool.h> /* bool type */
 
+#include "version.h"
+
+static char version[] = "nss_uc3 version " VERSION;
+
 static void *nssinfo;
 
 /* This function is part of nss itself.  It's available at runtime

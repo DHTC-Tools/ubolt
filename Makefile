@@ -18,8 +18,7 @@ all: $(targets)
 $(targets):
 	@ $(MAKE) nsslink manual name=$@
 
-$(patsubst %,%.c,$(targets)):
-	@ $(MAKE) nsscc name=$@
+$(patsubst %,%.c,$(targets)): version.h
 
 .PHONY: nsslink nsscc
 
@@ -30,8 +29,8 @@ manual: doc/$(name).txt
 	-rst2man doc/$(name).txt >doc/$(name).3.tmp
 	mv -f doc/$(name).3.tmp doc/$(name).3
 
-nsscc: $(name).c
-	gcc $(CFLAGS) -c -shared $(name).c
+version.h:
+	hg parents --template='#define VERSION "{rev} {node|short} ({latesttag}+{latesttagdistance})"\n' >version.h
 
 install:
 	arch=`uname -m`; \
@@ -43,5 +42,5 @@ install:
 
 clean:
 	rm -f $(patsubst %,%.o,$(targets)) $(patsubst %,lib%.so.2,$(targets)) \
-	$(patsubst %,doc/%.3,$(targets))
+		$(patsubst %,doc/%.3,$(targets)) version.h
 
