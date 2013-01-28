@@ -1,12 +1,13 @@
 
 prefix = /
 libdir = $(prefix)/lib
+lib64dir = $(prefix)/lib64
 
 targets = nss_identity nss_filter
 
 # If compiled with -DDEBUG, then applications will print debugging
 # information to stdout when NSSDEBUG is set in the environment.
-CFLAGS	+= -DDEBUG -g
+#CFLAGS	+= -DDEBUG -g
 
 # -fPIC is not required on all platforms, but is on some; and it doesn't
 # appear to hurt.
@@ -33,7 +34,12 @@ nsscc: $(name).c
 	gcc $(CFLAGS) -c -shared $(name).c
 
 install:
-	cp -f $(patsubst %,lib%.so.2,$(targets)) $(libdir)
+	arch=`uname -m`; \
+	if [ "$$arch" = "x86_64" ]; then \
+		cp -f $(patsubst %,lib%.so.2,$(targets)) $(lib64dir); \
+	else \
+		cp -f $(patsubst %,lib%.so.2,$(targets)) $(libdir); \
+	fi
 
 clean:
 	rm -f $(patsubst %,%.o,$(targets)) $(patsubst %,lib%.so.2,$(targets)) \
