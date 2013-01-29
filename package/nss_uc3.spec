@@ -1,12 +1,20 @@
 Summary: NSS modules used at UC3
 Name: nss_uc3
-Version: 25
+Version: 26
 Release: 1
 License: MIT
 URL: https://bitbucket.org/dgc/nss_uc3
 Group: Foo/Bar
 Source0: nss_uc3-%{version}.tar.gz
+Source1: nss_uc3-findrequires.sh
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+
+# We must disable depends generation because otherwise RPM won't allow
+# us to use glibc private symbols.  (We depend on glibc privates for
+# our whole principle of operation, though.)  So we set up filtering.  See:
+# https://fedoraproject.org/wiki/PackagingDrafts/FilteringAutomaticDependencies
+%define    _use_internal_dependency_generator 0
+%define    __find_requires %{SOURCE1}
 
 BuildRequires: make, gcc
 Provides: nss_identity = %{version}-%{release}, nss_filter = %{version}-%{release}
