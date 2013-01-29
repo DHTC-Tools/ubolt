@@ -1,4 +1,6 @@
 
+project = nss_uc3
+
 prefix = /
 libdir = $(prefix)/lib
 lib64dir = $(prefix)/lib64
@@ -20,7 +22,7 @@ $(targets):
 
 $(patsubst %,%.c,$(targets)): version.h
 
-.PHONY: nsslink nsscc
+.PHONY: nsslink nsscc install clean release
 
 nsslink: $(name).o
 	gcc $(CFLAGS) -shared -Wl,-soname,lib$(name).so.2 -o lib$(name).so.2 $(name).o
@@ -44,3 +46,11 @@ clean:
 	rm -f $(patsubst %,%.o,$(targets)) $(patsubst %,lib%.so.2,$(targets)) \
 		$(patsubst %,doc/%.3,$(targets)) version.h
 
+release:
+	rev=`hg parents --template '{rev}'`; \
+	dir=$(project)-$${rev}; \
+	rm -rf "$$dir"; \
+	hg archive "$$dir"; \
+	(cd "$$dir"; make version.h); \
+	tar czf "$$dir.tar.gz" "$$dir"; \
+	rm -rf "$$dir"
