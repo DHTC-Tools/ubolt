@@ -1,6 +1,6 @@
 Summary: NSS modules used at UC3
 Name: nss_uc3
-Version: 24
+Version: 25
 Release: 1
 License: MIT
 URL: https://bitbucket.org/dgc/nss_uc3

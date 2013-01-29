@@ -4,6 +4,7 @@ project = nss_uc3
 prefix = /
 libdir = $(prefix)/lib
 lib64dir = $(prefix)/lib64
+mandir = $(prefix)/usr/share/man/man3
 
 targets = nss_identity nss_filter
 
@@ -22,7 +23,7 @@ $(targets):
 
 $(patsubst %,%.c,$(targets)): version.h
 
-.PHONY: nsslink nsscc install clean release
+.PHONY: nsslink install clean release
 
 nsslink: $(name).o
 	gcc $(CFLAGS) -shared -Wl,-soname,lib$(name).so.2 -o lib$(name).so.2 $(name).o
@@ -37,14 +38,19 @@ version.h:
 install:
 	arch=`uname -m`; \
 	if [ "$$arch" = "x86_64" ]; then \
+		mkdir -p $(lib64dir); \
 		cp -f $(patsubst %,lib%.so.2,$(targets)) $(lib64dir); \
 	else \
+		mkdir -p $(libdir); \
 		cp -f $(patsubst %,lib%.so.2,$(targets)) $(libdir); \
 	fi
+	mkdir -p $(mandir)
+	cp -f $(patsubst %,doc/%.3,$(targets)) $(mandir)
 
 clean:
 	rm -f $(patsubst %,%.o,$(targets)) $(patsubst %,lib%.so.2,$(targets)) \
-		$(patsubst %,doc/%.3,$(targets)) version.h
+		$(patsubst %,doc/%.3,$(targets)) version.h \
+		$(patsubst %,doc/%.3,$(targets))
 
 release:
 	rev=`hg parents --template '{rev}'`; \
