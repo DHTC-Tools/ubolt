@@ -1,6 +1,6 @@
 
-NSS_UC3 consists (currently) of two NSS libraries summarized as follows.  See
-doc/nss_*.txt for deeper details.
+U-Bolt currently consists of two NSS libraries summarized as follows.
+See doc/nss_*.txt for deeper details.
 
 nss_identity
 ============
@@ -25,3 +25,9 @@ nss_filter
   * because it can be, and it is not complete;
   * because it only offers one type of filter that is hardcoded.
 
+
+A presentation to the OSG CIC group was given on 22 Feb 2013 covering much
+of the motivation, behavior, and implementation of the U-Bolt tools.  You
+can find the slide deck here:
+
+https://wiki.uchicago.edu/display/uc3/Presentations+about+UC3
