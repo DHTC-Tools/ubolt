@@ -155,6 +155,9 @@ filter_passwd(struct passwd *pwd, char *buffer, size_t buflen)
 static void
 init_wrapper (void)
 { 
+  /* this is just to ensure that version is referenced, and not optimized away */
+  version[0] = version[0];
+
   if (__nss_database_lookup ("filter.backend.passwd", NULL, "files", &nssinfo) >= 0)
     { 
       backend_getpwnam_r = (void *) __nss_lookup_function (nssinfo, "getpwnam_r");
@@ -261,6 +264,8 @@ _nss_filter_setpwent_r(int stayopen)
 enum nss_status
 _nss_filter_endpwent_r(void)
 {
+	enum nss_status r = NSS_STATUS_SUCCESS;
+
 	printd("nss_filter_endpwent_r\n");
 
 	if (nssinfo == NULL)
@@ -268,4 +273,6 @@ _nss_filter_endpwent_r(void)
 
 	if (backend_endpwent_r)
 		backend_endpwent_r();
+
+	return r;
 }
