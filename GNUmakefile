@@ -19,7 +19,7 @@ targets = $(nss_targets) $(pam_targets)
 
 # -fPIC is not required on all platforms, but is on some; and it doesn't
 # appear to hurt.
-CFLAGS += -fPIC
+CFLAGS += -fPIC $(cflags)
 
 all: $(targets)
 
