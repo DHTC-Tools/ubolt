@@ -33,10 +33,10 @@ $(patsubst %,%.c,$(targets)): version.o
 
 .PHONY: nsslink pamlink install clean release
 
-nsslink: $(name).o version.o
+nsslink: $(name).o util.o version.o
 	$(SO_LD) -o lib$(name).so.2 $(name).o version.o
 
-pamlink: $(name).o version.o
+pamlink: $(name).o util.o version.o
 	$(SO_LD) -o $(name).so $(name).o version.o $(PAM_LIBS)
 
 manual: doc/$(name).txt
@@ -47,6 +47,7 @@ version.c:
 	hg parents --template='static char version[] = "ubolt version {rev} {node|short} ({latesttag}+{latesttagdistance})";\n' >version.c
 
 version.o: version.c
+util.o: util.c
 
 install:
 	arch=`uname -m`; \
@@ -65,10 +66,10 @@ install:
 clean:
 	rm -f $(patsubst %,%.o,$(targets)) \
 		$(patsubst %,lib%.so.2,$(nss_targets)) \
-		$(patsubst %,%.so.2,$(pam_targets)) \
-		$(patsubst %,doc/%.3,$(targets)) version.c \
+		$(patsubst %,%.so,$(pam_targets)) \
 		$(patsubst %,doc/%.3,$(targets)) \
-		version.o
+		$(patsubst %,doc/%.3,$(targets)) \
+		util.o version.c version.o
 
 release:
 	rev=`hg parents --template '{rev}'`; \
