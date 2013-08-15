@@ -1,11 +1,12 @@
 Summary: Bolt-on identity management tools
 Name: ubolt
-Version: 26
+Version: 61
 Release: 1
 License: MIT
 URL: https://bitbucket.org/dgc/ubolt
 Group: Foo/Bar
-Source0: ubolt-%{version}.tar.gz
+%define hg_rev tip
+Source0: https://bitbucket.org/dgc/ubolt/get/%{hg_rev}.tar.gz
 Source1: ubolt-findrequires.sh
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
@@ -17,7 +18,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 %define    __find_requires %{SOURCE1}
 
 BuildRequires: make, gcc
-Provides: nss_identity = %{version}-%{release}, nss_filter = %{version}-%{release}
+Provides: nss_identity = %{version}-%{release}, nss_filter = %{version}-%{release}, pam_provision = %{version}-%{release}
 
 %description
 
@@ -44,8 +45,23 @@ nss_filter
   * because it can be, and it is not complete;
   * because it only offers one type of filter that is hardcoded.
 
+pam_provision
+=============
+
+  pam_provision.so is a PAM module to assist in automatic account
+  provisioning.  It assumes that some kind of functioning POSIX account
+  information is available through the name service switch: nss_files,
+  nss_ldap, whatever.  If you can provide the account information,
+  pam_provision can do whatever is necessary on the local system to
+  make the account function.  This could be as minor as creating a home
+  directory, or it could involve other elements of session management.
+  Pam_provision's only job is to call the program you tell it to.  This
+  provisioner program can be a shell script or a program in any other
+  language.  An example provisioner written in Python is included with
+  this distribution.
+
 %prep
-%setup -n ubolt-%{version}
+%setup -n dgc-ubolt-%{hg_rev}
 
 %build
 make all
@@ -59,10 +75,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%doc README
+%doc LICENSE README
 %doc doc/*.txt
+%doc provision.py
 /usr/share/man/man3/nss_identity.3.gz
 /usr/share/man/man3/nss_filter.3.gz
 /%{_lib}
-#/lib64/libnss_identity.so.2
-#/lib64/libnss_filter.so.2
