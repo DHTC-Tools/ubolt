@@ -6,10 +6,6 @@
 #include <unistd.h>
 #include <stdlib.h> /* sysconf() */
 
-#include "version.h"
-
-static char version[] = "nss_uc3 version " VERSION;
-
 enum nss_status
 group(const char *name, gid_t gid, struct group *grp,
       char *buf, size_t buflen, struct group **result)
