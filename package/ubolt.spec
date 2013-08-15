@@ -1,12 +1,12 @@
-Summary: NSS modules used at UC3
-Name: nss_uc3
+Summary: Bolt-on identity management tools
+Name: ubolt
 Version: 26
 Release: 1
 License: MIT
-URL: https://bitbucket.org/dgc/nss_uc3
+URL: https://bitbucket.org/dgc/ubolt
 Group: Foo/Bar
-Source0: nss_uc3-%{version}.tar.gz
-Source1: nss_uc3-findrequires.sh
+Source0: ubolt-%{version}.tar.gz
+Source1: ubolt-findrequires.sh
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 # We must disable depends generation because otherwise RPM won't allow
@@ -45,7 +45,7 @@ nss_filter
   * because it only offers one type of filter that is hardcoded.
 
 %prep
-%setup -n nss_uc3-%{version}
+%setup -n ubolt-%{version}
 
 %build
 make all
