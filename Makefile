@@ -1,5 +1,5 @@
 
-project = nss_uc3
+project = ubolt
 
 prefix = /
 libdir = $(prefix)/lib
