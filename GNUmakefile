@@ -5,6 +5,7 @@ project = ubolt
 prefix = /
 libdir = $(prefix)/lib
 lib64dir = $(prefix)/lib64
+pamdir = $(prefix)/lib/security
 mandir = $(prefix)/usr/share/man/man3
 
 nss_targets = nss_identity nss_filter
@@ -33,10 +34,10 @@ $(patsubst %,%.c,$(targets)): version.h
 .PHONY: nsslink pamlink install clean release
 
 nsslink: $(name).o
-	gcc $(CFLAGS) -shared -Wl,-soname,lib$(name).so.2 -o lib$(name).so.2 $(name).o
+	$(SO_LD) -o lib$(name).so.2 $(name).o
 
 pamlink: $(name).o
-	$(SO_LD) -o $@ $(name).o $(PAM_LIBS)
+	$(SO_LD) -o $(name).so $(name).o $(PAM_LIBS)
 
 manual: doc/$(name).txt
 	-rst2man doc/$(name).txt >doc/$(name).3.tmp
@@ -48,17 +49,21 @@ version.h:
 install:
 	arch=`uname -m`; \
 	if [ "$$arch" = "x86_64" ]; then \
-		mkdir -p $(lib64dir); \
-		cp -f $(patsubst %,lib%.so.2,$(targets)) $(lib64dir); \
+		mkdir -p $(lib64dir) $(pamdir); \
+		cp -f $(patsubst %,lib%.so.2,$(nss_targets)) $(lib64dir); \
+		cp -f $(patsubst %,%.so,$(pam_targets)) $(pamdir); \
 	else \
-		mkdir -p $(libdir); \
+		mkdir -p $(libdir) $(pamdir); \
 		cp -f $(patsubst %,lib%.so.2,$(targets)) $(libdir); \
+		cp -f $(patsubst %,%.so,$(pam_targets)) $(pamdir); \
 	fi
 	mkdir -p $(mandir)
 	cp -f $(patsubst %,doc/%.3,$(targets)) $(mandir)
 
 clean:
-	rm -f $(patsubst %,%.o,$(targets)) $(patsubst %,lib%.so.2,$(targets)) \
+	rm -f $(patsubst %,%.o,$(targets)) \
+		$(patsubst %,lib%.so.2,$(nss_targets)) \
+		$(patsubst %,%.so.2,$(pam_targets)) \
 		$(patsubst %,doc/%.3,$(targets)) version.h \
 		$(patsubst %,doc/%.3,$(targets))
 
