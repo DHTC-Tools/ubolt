@@ -161,7 +161,7 @@ msg(struct context *ctx, int level, char *fmt, ...)
 	vsnprintf(msgbuf, sizeof(msgbuf), fmtbuf, vp);
 	va_end(vp);
 
-	syslog(ctx->log|level, msgbuf);
+	syslog(ctx->log|level, "%s", msgbuf);
 }
 
 
