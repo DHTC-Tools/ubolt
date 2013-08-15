@@ -6,6 +6,8 @@
 #include <unistd.h>
 #include <stdlib.h> /* sysconf() */
 
+#include "debug.h"
+
 enum nss_status
 group(const char *name, gid_t gid, struct group *grp,
       char *buf, size_t buflen, struct group **result)
@@ -18,9 +20,7 @@ group(const char *name, gid_t gid, struct group *grp,
 	char grname[1024];
 	int r;
 
-#ifdef DEBUG
-	printf("name=%s, gid=%d, buf=%p, buflen=%d\n", name, (int) gid, buf, buflen);
-#endif
+	printd("name=%s, gid=%d, buf=%p, buflen=%d\n", name, (int) gid, buf, buflen);
 
 	/* Preset the result value so that we don't forget to do this
 	 * when returning early with an error. */
@@ -57,22 +57,16 @@ group(const char *name, gid_t gid, struct group *grp,
 		r = getpwuid_r((uid_t) gid, pw, pwdata, maxpwbuflen, &pwp);
 	}
 
-#ifdef DEBUG
-	printf("r = %d, pwp = %p, name = %p, gid = %d\n", r, pwp, name, gid);
-#endif
+	printd("r = %d, pwp = %p, name = %p, gid = %d\n", r, pwp, name, gid);
 
 	if (r != 0 || pwp == NULL) {
-#ifdef DEBUG
-		printf("no\n");
-#endif
+		printd("no\n");
 		/* Not found, add space for empty member list to requirements */
 		len += sizeof(char *);
 	}
 
 	else {
-#ifdef DEBUG
-		printf("yes\n");
-#endif
+		printd("yes\n");
 		/* If found, add space for 1-element member list to requirements */
 		len += sizeof(char *) * 2;
 		len += strlen(pwp->pw_name) + 1;
@@ -161,10 +155,7 @@ enum nss_status
 _nss_identity_getgrnam_r(const char *name, struct group *grp,
                          char *buf, size_t buflen, struct group **result)
 {
-#ifdef DEBUG
-	printf("nss_identity_getgrgid_r\n");
-	fflush(stdout);
-#endif
+	printd("nss_identity_getgrgid_r\n");
 
 	/* Hand off to generic group backend */
 	return group(name, -1, grp, buf, buflen, result);
@@ -175,10 +166,7 @@ enum nss_status
 _nss_identity_getgrgid_r(gid_t gid, struct group *grp,
                          char *buf, size_t buflen, struct group **result)
 {
-#ifdef DEBUG
-	printf("nss_identity_getgrgid_r\n");
-	fflush(stdout);
-#endif
+	printd("nss_identity_getgrgid_r\n");
 
 	/* Hand off to generic group backend */
 	return group(NULL, gid, grp, buf, buflen, result);
