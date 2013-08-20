@@ -9,7 +9,7 @@ pamdir = $(prefix)/lib/security
 mandir = $(prefix)/usr/share/man/man3
 
 nss_targets = nss_identity nss_filter
-pam_targets = pam_provision
+pam_targets = pam_provision pam_globus
 
 targets = $(nss_targets) $(pam_targets)
 
@@ -26,8 +26,11 @@ all: $(targets)
 $(nss_targets):
 	@ $(MAKE) nsslink manual name=$@
 
-$(pam_targets):
+pam_provision:
 	@ $(MAKE) pamlink manual name=$@
+
+pam_globus: globus.o
+	@ $(MAKE) pamlink manual name=$@ PAM_LIBS="globus.o -lcurl"
 
 $(patsubst %,%.c,$(targets)): version.o
 
@@ -37,7 +40,7 @@ nsslink: $(name).o util.o version.o
 	$(SO_LD) -o lib$(name).so.2 $(name).o version.o
 
 pamlink: $(name).o util.o version.o
-	$(SO_LD) -o $(name).so $(name).o version.o $(PAM_LIBS)
+	$(SO_LD) -o $(name).so $(name).o version.o util.o $(PAM_LIBS)
 
 manual: doc/$(name).txt
 	-rst2man doc/$(name).txt >doc/$(name).3.tmp

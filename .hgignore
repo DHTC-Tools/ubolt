@@ -4,3 +4,4 @@ syntax: glob
 *.so.2
 *.o
 doc/*.3
+version.c
