@@ -72,7 +72,7 @@ clean:
 		$(patsubst %,%.so,$(pam_targets)) \
 		$(patsubst %,doc/%.3,$(targets)) \
 		$(patsubst %,doc/%.3,$(targets)) \
-		util.o version.c version.o
+		globus.o util.o version.c version.o
 
 release:
 	rev=`hg parents --template '{rev}'`; \
