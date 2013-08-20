@@ -7,10 +7,10 @@ perform authentication against the Globus Online identity service
 -----------------------------------------------------------------
 
 :Author: dgc@uchicago.edu
-:Date:   2013-08-14
+:Date:   2013-08-20
 :Copyright: David Champion and University of Chicago
 :Version: 0.3
-:Manual section: 3
+:Manual section: 8
 :Manual group: pam libraries
 
 

@@ -10,8 +10,8 @@ execute provisioner code during pam session creation
 :Date:   2013-08-14
 :Copyright: David Champion and University of Chicago
 :Version: 0.3
-:Manual section: 3
-:Manual group: nsswitch libraries
+:Manual section: 8
+:Manual group: pam libraries
 
 
 SYNOPSIS

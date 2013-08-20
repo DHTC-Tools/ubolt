@@ -10,7 +10,7 @@ alter NSS database results in-flight (limited)
 :Date:   2013-01-22
 :Copyright: David Champion and University of Chicago
 :Version: 0.1
-:Manual section: 3
+:Manual section: 8
 :Manual group: nsswitch libraries
 
 
