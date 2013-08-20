@@ -1,0 +1,73 @@
+==========
+pam_globus
+==========
+
+-----------------------------------------------------------------
+perform authentication against the Globus Online identity service
+-----------------------------------------------------------------
+
+:Author: dgc@uchicago.edu
+:Date:   2013-08-14
+:Copyright: David Champion and University of Chicago
+:Version: 0.3
+:Manual section: 3
+:Manual group: pam libraries
+
+
+SYNOPSIS
+========
+
+  ``pam_globus`` is a Pluggable Authentication Modules (PAM) component.
+  It must be set up in a PAM configuration file to operate.
+
+  Usage depends on platform.  For Solaris, usage will be something like
+  (in ``/etc/pam.conf``)::
+
+    other account required pam_globus.so
+    sshd-kbdint account required pam_globus.so
+    sshd-kbdint session required pam_globus.so
+
+  For Linux, usage will be slightly different.  For example, in
+  ``/etc/pam.d/password-auth``::
+
+    auth  required      pam_env.so
+    auth  sufficient    pam_globus.so
+    auth  sufficient    pam_unix.so nullok try_first_pass
+    auth  requisite     pam_succeed_if.so uid >= 500 quiet
+    auth  required      pam_deny.so
+
+
+DESCRIPTION
+===========
+
+  pam_globus.so permits password authentication using Globus Online
+  (https://globusonline.org) identity.  WHen pam_globus is in play,
+  users of your POSIX system whose local identities match a Globus
+  Online identity may authenticate using that Globus Online identity's
+  password.  This is accomplished using the Globus Nexus REST API.
+
+  Passwords are collected in cleartext and sent over an SSL connection to
+  the Nexus API.  Cleartext passwords are not stored or logged locally.
+
+
+CONFIGURATION
+=============
+
+  The module should reside in the default location for PAM modules if you
+  do not give path information.  If you do not want to install there,
+  provide the full path to the module.  On Solaris (at least) PAM modules
+  must be owned by root and NOT writable by non-root users.
+
+  Linux keeps PAM modules in ``/lib/security`` or in ``/lib64/security``.
+
+  Your particular environment decides the service name. "sshd-kbdint" is
+  used for keyboard authentication under OpenSSH, but "login" is used for
+  local logins.  If you do not know what service to use, try "other" and
+  watch your logs to see what service is identified by a login attempt.
+  You may need to configure syslog to record LOG_DEBUG messages.
+
+  Pam_globus currently provides no functionality for SESSION or ACCOUNT
+  services.  It applies only to AUTH.
+
+  pam_globus.so logs to syslog, usign LOG_AUTH.
+
