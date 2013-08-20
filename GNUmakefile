@@ -6,7 +6,7 @@ prefix = /
 libdir = $(prefix)/lib
 lib64dir = $(prefix)/lib64
 pamdir = $(prefix)/lib/security
-mandir = $(prefix)/usr/share/man/man3
+mandir = $(prefix)/usr/share/man/man8
 
 nss_targets = nss_identity nss_filter
 pam_targets = pam_provision pam_globus
@@ -43,8 +43,8 @@ pamlink: $(name).o util.o version.o
 	$(SO_LD) -o $(name).so $(name).o version.o util.o $(PAM_LIBS)
 
 manual: doc/$(name).txt
-	-rst2man doc/$(name).txt >doc/$(name).3.tmp
-	mv -f doc/$(name).3.tmp doc/$(name).3
+	-rst2man doc/$(name).txt >doc/$(name).8.tmp
+	mv -f doc/$(name).8.tmp doc/$(name).8
 
 version.c:
 	hg parents --template='static char version[] = "ubolt version {rev} {node|short} ({latesttag}+{latesttagdistance})";\n' >version.c
@@ -64,14 +64,14 @@ install:
 		cp -f $(patsubst %,%.so,$(pam_targets)) $(pamdir); \
 	fi
 	mkdir -p $(mandir)
-	cp -f $(patsubst %,doc/%.3,$(targets)) $(mandir)
+	cp -f $(patsubst %,doc/%.8,$(targets)) $(mandir)
 
 clean:
 	rm -f $(patsubst %,%.o,$(targets)) \
 		$(patsubst %,lib%.so.2,$(nss_targets)) \
 		$(patsubst %,%.so,$(pam_targets)) \
-		$(patsubst %,doc/%.3,$(targets)) \
-		$(patsubst %,doc/%.3,$(targets)) \
+		$(patsubst %,doc/%.8,$(targets)) \
+		$(patsubst %,doc/%.8,$(targets)) \
 		globus.o util.o version.c version.o
 
 release:
