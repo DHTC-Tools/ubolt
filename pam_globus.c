@@ -18,6 +18,12 @@
 //#include <sys/socket.h>
 //#include <syslog.h>
 
+// Needed in case code is compiled statically
+#define PAM_SM_ACCOUNT
+#define PAM_SM_AUTH
+#define PAM_SM_PASSWORD
+#define PAM_SM_SESSION
+
 #include <security/pam_appl.h>
 #include <security/pam_modules.h>
 
@@ -226,4 +232,10 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char **argv)
 	msg(settings->ctx, LOG_INFO, "%s@%s: acct mgmt for %s@%s",
 	    settings->ctx->svc, settings->ctx->uts.nodename, settings->ctx->user, settings->ctx->rhost);
 	return result;
+}
+
+/* PAM entry point for authentication token (password) changes */
+int pam_sm_chauthtok(pam_handle_t *pamh, int flags, int argc, const char **argv) {
+          printf("You must change your password using the website!\n");
+          return PAM_PERM_DENIED;
 }
