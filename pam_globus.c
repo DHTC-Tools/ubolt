@@ -236,6 +236,13 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char **argv)
 
 /* PAM entry point for authentication token (password) changes */
 int pam_sm_chauthtok(pam_handle_t *pamh, int flags, int argc, const char **argv) {
+          const void **user;
+          int retval = pam_get_item(pamh, PAM_USER, user);
+          if (retval == PAM_SUCCESS) {
+                  if (strcmp((char *)*user, "root") == 0) {
+                          return PAM_SUCCESS;
+                  } 
+          }
           printf("You must change your password using the website!\n");
           return PAM_PERM_DENIED;
 }
